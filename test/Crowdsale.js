@@ -82,4 +82,25 @@ describe("Crowdsale", () => {
             })
         });
     });
+
+    describe('Sending ETH', () => {
+        let transaction, result;
+        let amount = ether(10);
+
+        describe('Success', async () => {
+            beforeEach(async () => {
+                transaction = await user1.sendTransaction({ to: crowdsale.address, value: amount });
+                result = await transaction.wait();
+            })
+
+            it('transfers tokens', async () => {
+                expect(await token.balanceOf(crowdsale.address)).to.equal(tokens(999990));
+                expect(await token.balanceOf(user1.address)).to.equal(tokens(10));
+            })
+
+            it('updates contracts balance', async () => {
+                expect(await ethers.provider.getBalance(crowdsale.address)).to.equal(amount);
+            }) 
+        })
+    })
 })
