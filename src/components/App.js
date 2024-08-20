@@ -30,23 +30,38 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
 
   const loadBlockchainData = async () => {
+
+
+    if (!window.ethereum) {
+        console.error('Ethereum provider not found. Please install MetaMask.');
+        alert('MetaMask is not installed. Please install MetaMask to use this application.');
+        return;
+      }
+    
+      // Check if MetaMask is the provider
+      if (!window.ethereum.isMetaMask) {
+        console.error('MetaMask is not detected.');
+        alert('Please use MetaMask to connect to the application.');
+        return;
+      }
     // Intiantiate provider
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     setProvider(provider)
 
     // Fetch Chain ID
     const { chainId } = await provider.getNetwork()
-    console.log('Chain ID:', chainId);
     
     // Intiantiate contracts
-    const token = new ethers.Contract(config[31337].token.address, TOKEN_ABI, provider)
+    const token = new ethers.Contract(config[chainId].token.address, TOKEN_ABI, provider)
     const crowdsale = new ethers.Contract(config[chainId].crowdsale.address, CROWDSALE_ABI, provider)
     setCrowdsale(crowdsale)
 
+    
     // Fetch account
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     const account = ethers.utils.getAddress(accounts[0])
     setAccount(account)
+  
 
     // Fetch account balance
     const accountBalance = ethers.utils.formatUnits(await token.balanceOf(account), 18)
